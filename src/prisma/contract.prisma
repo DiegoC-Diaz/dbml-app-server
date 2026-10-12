@@ -1,0 +1,61 @@
+// use prisma-8
+// Contract inferred from the live database schema. Edit as needed, then run `prisma contract emit`.
+
+namespace public {
+  model Users {
+    id                         Uuid             @id(map: "users_pkey")
+    username                   VarChar(50)      @unique(map: "users_username_key")
+    email                      VarChar(255)     @unique(map: "users_email_key")
+    passwordHash               VarChar(255)?    @map("password_hash")
+    githubId                   VarChar(100)?    @unique(map: "users_github_id_key") @map("github_id")
+    emailVerified              Boolean          @default(false) @map("email_verified")
+    createdAt                  TimestampString  @default(now()) @map("created_at")
+    updatedAt                  TimestampString? @default(now()) @map("updated_at")
+    isActive                   Boolean          @default(true) @map("is_active")
+    projects                   Projects[]       @relation(name: "projects_created_by_fkey")
+    projectsProjects           Projects[]       @relation(name: "projects_owner_user_id_fkey")
+    projectsUsers              ProjectsUsers[]  @relation(name: "projects_users_created_by_fkey")
+    projectsUsersProjectsUsers ProjectsUsers[]  @relation(name: "projects_users_user_id_fkey")
+
+    @@map("users")
+  }
+
+  model Projects {
+    id            Uuid             @id(map: "projects_pkey")
+    ownerUserId   Uuid             @map("owner_user_id")
+    title         VarChar(150)
+    description   VarChar(500)?
+    createdBy     Uuid             @map("created_by")
+    createdAt     TimestampString  @default(now()) @map("created_at")
+    updatedAt     TimestampString? @default(now()) @map("updated_at")
+    isActive      Boolean          @default(true) @map("is_active")
+    projectsUsers ProjectsUsers[]
+    users         Users            @relation(name: "projects_created_by_fkey", fields: [createdBy], references: [id], map: "projects_created_by_fkey", index: false)
+    ownerUser     Users            @relation(name: "projects_owner_user_id_fkey", fields: [ownerUserId], references: [id], map: "projects_owner_user_id_fkey", index: false)
+
+    @@map("projects")
+  }
+
+  model ProjectsUsers {
+    id        Uuid                 @id(map: "projects_users_pkey")
+    projectId Uuid                 @map("project_id")
+    userId    Uuid                 @map("user_id")
+    role      pg.enum(ProjectRole) @default("viewer")
+    createdBy Uuid                 @map("created_by")
+    createdAt TimestampString      @default(now()) @map("created_at")
+    updatedAt TimestampString?     @default(now()) @map("updated_at")
+    isActive  Boolean              @default(true) @map("is_active")
+    users     Users                @relation(name: "projects_users_created_by_fkey", fields: [createdBy], references: [id], map: "projects_users_created_by_fkey", index: false)
+    project   Projects             @relation(fields: [projectId], references: [id], map: "projects_users_project_id_fkey", index: false)
+    user      Users                @relation(name: "projects_users_user_id_fkey", fields: [userId], references: [id], map: "projects_users_user_id_fkey", index: false)
+
+    @@map("projects_users")
+  }
+
+  native_enum ProjectRole {
+    viewer = "viewer"
+    editor = "editor"
+    copier = "copier"
+    @@map("project_role")
+  }
+}
