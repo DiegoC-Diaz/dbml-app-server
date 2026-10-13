@@ -1,10 +1,18 @@
-export interface RegisterDTO {
-  email: string;
-  password: string;
-  username: string;
-}
+import {z} from "zod"
+export const registerSchema=z.object({
+  email: z.string(),
+  password: z.string().min(8),
+  username: z.string().min(3),
+})
 
-export interface LoginDTO {
-  email: string;
-  password: string;
-}
+export const loginSchema=z.object({
+  email: z.string(),
+  password: z.string().min(8),
+})
+
+
+export type LoginDTO = z.infer<typeof loginSchema>;
+export type RegisterDTO=z.infer<typeof registerSchema>;
+
+
+

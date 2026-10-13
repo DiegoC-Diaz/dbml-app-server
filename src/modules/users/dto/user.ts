@@ -1,4 +1,4 @@
-export type User = {
+export interface User {
   createdAt: string;
   email: string;
   emailVerified: boolean;
