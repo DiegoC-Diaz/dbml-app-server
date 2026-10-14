@@ -11,6 +11,7 @@ export class AuthService {
 
   async register(data: { email: string; password: string; username: string }) {
     const existing = await this.usersService.findByEmail(data.email);
+
     if (existing) {
       throw new BadRequestException("El correo electrónico ya está registrado");
     }
@@ -28,6 +29,40 @@ export class AuthService {
     return { user: newUser, token };
   }
 
+  async refresh(refreshToken: string) {
+    const payload = await this.validateRefreshToken(refreshToken);
+    const user = await this.usersService.findById(payload.sub);
+
+    if (!user) {
+      throw new UnauthorizedException("Usuario no válido o inexistente");
+    }
+
+    return {
+      accessToken: this.jwtService.sign({
+        sub: user.id,
+        email: user.email,
+      }),
+    };
+  }
+
+  async validateRefreshToken(token: string) {
+  try {
+    const payload = await this.jwtService.verifyAsync(token, {
+      secret: process.env.JWT_SECRET||"key_development",
+      algorithms: ['HS256'],
+    });
+
+    if (payload.tokenType !== 'refresh') {
+      throw new UnauthorizedException('Invalid token type');
+    }
+
+    return payload;
+  } catch {
+    throw new UnauthorizedException('Invalid refresh token');
+  }
+}
+
+
   async login(data: { email: string; password: string }) {
     const user = await this.usersService.findByEmail(data.email);
     if (!user) {
@@ -43,8 +78,18 @@ export class AuthService {
       throw new UnauthorizedException("Credenciales inválidas");
     }
 
-    const token = this.jwtService.sign({ sub: user.id, email: user.email });
+    const access_token = this.jwtService.sign({ sub: user.id, email: user.email });
+
+    const refreshToken = await this.jwtService.signAsync(
+      { sub: user.id, email: user.email, tokenType: "refresh" },
+      {
+        expiresIn: "7d",
+        secret: process.env.JWT_SECRET || "key_development",
+      },
+    );
+  
+  
     const { passwordHash, ...safeUser } = user;
-    return { user: safeUser, token };
+    return { user: safeUser, token: access_token, refreshToken };
   }
 }
