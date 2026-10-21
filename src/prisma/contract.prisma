@@ -21,35 +21,53 @@ namespace public {
   }
 
   model Projects {
-    id            Uuid             @id(map: "projects_pkey")
-    ownerUserId   Uuid             @map("owner_user_id")
-    title         VarChar(150)
-    description   VarChar(500)?
-    createdBy     Uuid             @map("created_by")
-    createdAt     TimestampString  @default(now()) @map("created_at")
-    updatedAt     TimestampString? @default(now()) @map("updated_at")
-    isActive      Boolean          @default(true) @map("is_active")
-    projectsUsers ProjectsUsers[]
-    users         Users            @relation(name: "projects_created_by_fkey", fields: [createdBy], references: [id], map: "projects_created_by_fkey", index: false)
-    ownerUser     Users            @relation(name: "projects_owner_user_id_fkey", fields: [ownerUserId], references: [id], map: "projects_owner_user_id_fkey", index: false)
+    id              Uuid              @id(map: "projects_pkey")
+    ownerUserId     Uuid              @map("owner_user_id")
+    title           VarChar(150)
+    description     VarChar(500)?
+    createdBy       Uuid              @map("created_by")
+    createdAt       TimestampString   @default(now()) @map("created_at")
+    updatedAt       TimestampString?  @default(now()) @map("updated_at")
+    isActive        Boolean           @default(true) @map("is_active")
+    currentDbml     String            @map("current_dbml")
+    crdtState       Bytes?            @map("crdt_state")
+    layoutMetadata  Jsonb?            @map("layout_metadata")
+    projectVersions ProjectVersions[]
+    projectsUsers   ProjectsUsers[]
+    users           Users             @relation(name: "projects_created_by_fkey", fields: [createdBy], references: [id], map: "projects_created_by_fkey", index: false)
+    ownerUser       Users             @relation(name: "projects_owner_user_id_fkey", fields: [ownerUserId], references: [id], map: "projects_owner_user_id_fkey", index: false)
 
     @@map("projects")
   }
 
   model ProjectsUsers {
-    id        Uuid                 @id(map: "projects_users_pkey")
-    projectId Uuid                 @map("project_id")
-    userId    Uuid                 @map("user_id")
-    role      pg.enum(ProjectRole) @default("viewer")
-    createdBy Uuid                 @map("created_by")
-    createdAt TimestampString      @default(now()) @map("created_at")
-    updatedAt TimestampString?     @default(now()) @map("updated_at")
-    isActive  Boolean              @default(true) @map("is_active")
-    users     Users                @relation(name: "projects_users_created_by_fkey", fields: [createdBy], references: [id], map: "projects_users_created_by_fkey", index: false)
-    project   Projects             @relation(fields: [projectId], references: [id], map: "projects_users_project_id_fkey", index: false)
-    user      Users                @relation(name: "projects_users_user_id_fkey", fields: [userId], references: [id], map: "projects_users_user_id_fkey", index: false)
+    id              Uuid                 @id(map: "projects_users_pkey")
+    projectId       Uuid                 @map("project_id")
+    userId          Uuid                 @map("user_id")
+    role            pg.enum(ProjectRole) @default("viewer")
+    createdBy       Uuid                 @map("created_by")
+    createdAt       TimestampString      @default(now()) @map("created_at")
+    updatedAt       TimestampString?     @default(now()) @map("updated_at")
+    isActive        Boolean              @default(true) @map("is_active")
+    projectVersions ProjectVersions[]
+    users           Users                @relation(name: "projects_users_created_by_fkey", fields: [createdBy], references: [id], map: "projects_users_created_by_fkey", index: false)
+    project         Projects             @relation(fields: [projectId], references: [id], map: "projects_users_project_id_fkey", index: false)
+    user            Users                @relation(name: "projects_users_user_id_fkey", fields: [userId], references: [id], map: "projects_users_user_id_fkey", index: false)
 
     @@map("projects_users")
+  }
+
+  model ProjectVersions {
+    id            Uuid             @id(map: "project_versions_pk")
+    projectId     Uuid             @map("project_id")
+    createdBy     Uuid             @map("created_by")
+    dbmlSnapshot  String           @map("dbml_snapshot")
+    createdAt     TimestampString? @map("created_at")
+    commitMessage VarChar(300)?    @map("commit_message")
+    project       Projects         @relation(fields: [projectId], references: [id], map: "project_versions_projects_fk", index: false)
+    projectsUsers ProjectsUsers    @relation(fields: [createdBy], references: [id], map: "project_versions_projects_users_fk", index: false)
+
+    @@map("project_versions")
   }
 
   native_enum ProjectRole {

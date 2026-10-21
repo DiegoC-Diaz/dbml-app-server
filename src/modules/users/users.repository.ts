@@ -3,7 +3,7 @@ import { PrismaService } from '../../prisma/index.js';
 import { toVarchar } from '../../common/castings.js';
 import { randomUUID } from 'crypto';
 import type { CreateUserDTO } from './dto/create.user.dto.js';
-import type { FieldOutputTypes } from '../../prisma/contract.d.js';
+import type { FieldOutputTypes } from '../../prisma/contract.js';
 export type UserRecord = FieldOutputTypes['public']['Users'];
 
 @Injectable()

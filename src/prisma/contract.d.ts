@@ -18,7 +18,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'48d97702cdfd5f8d33e6e1a9222e0d0f44f4d714c8dc1aeab16c3c2700c4013b'>;
+  StorageHashBase<'f68f93e35870291e96a33666759799cad581899e606fa59f3cff62e9f8319b49'>;
 export type ExecutionHash = ExecutionHashBase<string>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
@@ -234,11 +234,14 @@ type DefaultLiteralValue<CodecId extends string, Encoded> = CodecId extends keyo
 export type FieldOutputTypes = {
   readonly public: {
     readonly Projects: {
+      readonly crdtState: CodecTypes['pg/bytea@1']['output'] | null;
       readonly createdAt: CodecTypes['pg/timestamp-string@1']['output'];
       readonly createdBy: CodecTypes['pg/uuid@1']['output'];
+      readonly currentDbml: CodecTypes['pg/text@1']['output'];
       readonly description: Varchar<500> | null;
       readonly id: CodecTypes['pg/uuid@1']['output'];
       readonly isActive: CodecTypes['pg/bool@1']['output'];
+      readonly layoutMetadata: CodecTypes['pg/jsonb@1']['output'] | null;
       readonly ownerUserId: CodecTypes['pg/uuid@1']['output'];
       readonly title: Varchar<150>;
       readonly updatedAt: CodecTypes['pg/timestamp-string@1']['output'] | null;
@@ -252,6 +255,14 @@ export type FieldOutputTypes = {
       readonly role: 'viewer' | 'editor' | 'copier';
       readonly updatedAt: CodecTypes['pg/timestamp-string@1']['output'] | null;
       readonly userId: CodecTypes['pg/uuid@1']['output'];
+    };
+    readonly ProjectVersions: {
+      readonly commitMessage: Varchar<300> | null;
+      readonly createdAt: CodecTypes['pg/timestamp-string@1']['output'] | null;
+      readonly createdBy: CodecTypes['pg/uuid@1']['output'];
+      readonly dbmlSnapshot: CodecTypes['pg/text@1']['output'];
+      readonly id: CodecTypes['pg/uuid@1']['output'];
+      readonly projectId: CodecTypes['pg/uuid@1']['output'];
     };
     readonly Users: {
       readonly createdAt: CodecTypes['pg/timestamp-string@1']['output'];
@@ -269,11 +280,14 @@ export type FieldOutputTypes = {
 export type FieldInputTypes = {
   readonly public: {
     readonly Projects: {
+      readonly crdtState: CodecTypes['pg/bytea@1']['input'] | null;
       readonly createdAt: CodecTypes['pg/timestamp-string@1']['input'];
       readonly createdBy: CodecTypes['pg/uuid@1']['input'];
+      readonly currentDbml: CodecTypes['pg/text@1']['input'];
       readonly description: CodecTypes['sql/varchar@1']['input'] | null;
       readonly id: CodecTypes['pg/uuid@1']['input'];
       readonly isActive: CodecTypes['pg/bool@1']['input'];
+      readonly layoutMetadata: CodecTypes['pg/jsonb@1']['input'] | null;
       readonly ownerUserId: CodecTypes['pg/uuid@1']['input'];
       readonly title: CodecTypes['sql/varchar@1']['input'];
       readonly updatedAt: CodecTypes['pg/timestamp-string@1']['input'] | null;
@@ -287,6 +301,14 @@ export type FieldInputTypes = {
       readonly role: 'viewer' | 'editor' | 'copier';
       readonly updatedAt: CodecTypes['pg/timestamp-string@1']['input'] | null;
       readonly userId: CodecTypes['pg/uuid@1']['input'];
+    };
+    readonly ProjectVersions: {
+      readonly commitMessage: CodecTypes['sql/varchar@1']['input'] | null;
+      readonly createdAt: CodecTypes['pg/timestamp-string@1']['input'] | null;
+      readonly createdBy: CodecTypes['pg/uuid@1']['input'];
+      readonly dbmlSnapshot: CodecTypes['pg/text@1']['input'];
+      readonly id: CodecTypes['pg/uuid@1']['input'];
+      readonly projectId: CodecTypes['pg/uuid@1']['input'];
     };
     readonly Users: {
       readonly createdAt: CodecTypes['pg/timestamp-string@1']['input'];
@@ -303,12 +325,23 @@ export type FieldInputTypes = {
 };
 export type StorageColumnTypes = {
   readonly public: {
+    readonly project_versions: {
+      readonly commit_message: Varchar<300> | null;
+      readonly created_at: CodecTypes['pg/timestamp-string@1']['output'] | null;
+      readonly created_by: CodecTypes['pg/uuid@1']['output'];
+      readonly dbml_snapshot: CodecTypes['pg/text@1']['output'];
+      readonly id: CodecTypes['pg/uuid@1']['output'];
+      readonly project_id: CodecTypes['pg/uuid@1']['output'];
+    };
     readonly projects: {
+      readonly crdt_state: CodecTypes['pg/bytea@1']['output'] | null;
       readonly created_at: CodecTypes['pg/timestamp-string@1']['output'];
       readonly created_by: CodecTypes['pg/uuid@1']['output'];
+      readonly current_dbml: CodecTypes['pg/text@1']['output'];
       readonly description: Varchar<500> | null;
       readonly id: CodecTypes['pg/uuid@1']['output'];
       readonly is_active: CodecTypes['pg/bool@1']['output'];
+      readonly layout_metadata: CodecTypes['pg/jsonb@1']['output'] | null;
       readonly owner_user_id: CodecTypes['pg/uuid@1']['output'];
       readonly title: Varchar<150>;
       readonly updated_at: CodecTypes['pg/timestamp-string@1']['output'] | null;
@@ -338,12 +371,23 @@ export type StorageColumnTypes = {
 };
 export type StorageColumnInputTypes = {
   readonly public: {
+    readonly project_versions: {
+      readonly commit_message: CodecTypes['sql/varchar@1']['input'] | null;
+      readonly created_at: CodecTypes['pg/timestamp-string@1']['input'] | null;
+      readonly created_by: CodecTypes['pg/uuid@1']['input'];
+      readonly dbml_snapshot: CodecTypes['pg/text@1']['input'];
+      readonly id: CodecTypes['pg/uuid@1']['input'];
+      readonly project_id: CodecTypes['pg/uuid@1']['input'];
+    };
     readonly projects: {
+      readonly crdt_state: CodecTypes['pg/bytea@1']['input'] | null;
       readonly created_at: CodecTypes['pg/timestamp-string@1']['input'];
       readonly created_by: CodecTypes['pg/uuid@1']['input'];
+      readonly current_dbml: CodecTypes['pg/text@1']['input'];
       readonly description: CodecTypes['sql/varchar@1']['input'] | null;
       readonly id: CodecTypes['pg/uuid@1']['input'];
       readonly is_active: CodecTypes['pg/bool@1']['input'];
+      readonly layout_metadata: CodecTypes['pg/jsonb@1']['input'] | null;
       readonly owner_user_id: CodecTypes['pg/uuid@1']['input'];
       readonly title: CodecTypes['sql/varchar@1']['input'];
       readonly updated_at: CodecTypes['pg/timestamp-string@1']['input'] | null;
@@ -373,19 +417,34 @@ export type StorageColumnInputTypes = {
 };
 
 export namespace Models {
+  export type public_ProjectVersions = {
+    commitMessage: Varchar<300> | null;
+    createdAt: CodecTypes['pg/timestamp-string@1']['output'] | null;
+    createdBy: CodecTypes['pg/uuid@1']['output'];
+    dbmlSnapshot: CodecTypes['pg/text@1']['output'];
+    id: CodecTypes['pg/uuid@1']['output'];
+    projectId: CodecTypes['pg/uuid@1']['output'];
+    project: public_Projects;
+    projectsUsers: public_ProjectsUsers;
+    readonly [RelationKeys]?: 'project' | 'projectsUsers';
+  };
   export type public_Projects = {
+    crdtState: CodecTypes['pg/bytea@1']['output'] | null;
     createdAt: CodecTypes['pg/timestamp-string@1']['output'];
     createdBy: CodecTypes['pg/uuid@1']['output'];
+    currentDbml: CodecTypes['pg/text@1']['output'];
     description: Varchar<500> | null;
     id: CodecTypes['pg/uuid@1']['output'];
     isActive: CodecTypes['pg/bool@1']['output'];
+    layoutMetadata: CodecTypes['pg/jsonb@1']['output'] | null;
     ownerUserId: CodecTypes['pg/uuid@1']['output'];
     title: Varchar<150>;
     updatedAt: CodecTypes['pg/timestamp-string@1']['output'] | null;
     ownerUser: public_Users;
+    projectVersions: public_ProjectVersions[];
     projectsUsers: public_ProjectsUsers[];
     users: public_Users;
-    readonly [RelationKeys]?: 'ownerUser' | 'projectsUsers' | 'users';
+    readonly [RelationKeys]?: 'ownerUser' | 'projectVersions' | 'projectsUsers' | 'users';
   };
   export type public_ProjectsUsers = {
     createdAt: CodecTypes['pg/timestamp-string@1']['output'];
@@ -397,9 +456,10 @@ export namespace Models {
     updatedAt: CodecTypes['pg/timestamp-string@1']['output'] | null;
     userId: CodecTypes['pg/uuid@1']['output'];
     project: public_Projects;
+    projectVersions: public_ProjectVersions[];
     user: public_Users;
     users: public_Users;
-    readonly [RelationKeys]?: 'project' | 'user' | 'users';
+    readonly [RelationKeys]?: 'project' | 'projectVersions' | 'user' | 'users';
   };
   export type public_Users = {
     createdAt: CodecTypes['pg/timestamp-string@1']['output'];
@@ -422,6 +482,7 @@ export namespace Models {
 
 export declare const models: {
   public: {
+    ProjectVersions: Models.public_ProjectVersions;
     Projects: Models.public_Projects;
     ProjectsUsers: Models.public_ProjectsUsers;
     Users: Models.public_Users;
@@ -446,8 +507,89 @@ type ContractBase = Omit<
         readonly kind: 'postgres-schema';
         readonly entries: {
           readonly table: {
+            readonly project_versions: {
+              columns: {
+                readonly commit_message: {
+                  readonly dataType: 'pg/varchar';
+                  readonly codecId: 'sql/varchar@1';
+                  readonly nullable: true;
+                  readonly typeParams: { readonly length: 300 };
+                  readonly many: false;
+                };
+                readonly created_at: {
+                  readonly dataType: 'pg/timestamp';
+                  readonly codecId: 'pg/timestamp-string@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly created_by: {
+                  readonly dataType: 'pg/uuid';
+                  readonly codecId: 'pg/uuid@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly dbml_snapshot: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly id: {
+                  readonly dataType: 'pg/uuid';
+                  readonly codecId: 'pg/uuid@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly project_id: {
+                  readonly dataType: 'pg/uuid';
+                  readonly codecId: 'pg/uuid@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+              };
+              primaryKey: {
+                readonly columns: readonly ['id'];
+                readonly name: 'project_versions_pk';
+              };
+              uniques: readonly [];
+              indexes: readonly [];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'project_versions';
+                    readonly columns: readonly ['project_id'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'projects';
+                    readonly columns: readonly ['id'];
+                  };
+                  readonly name: 'project_versions_projects_fk';
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'project_versions';
+                    readonly columns: readonly ['created_by'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'projects_users';
+                    readonly columns: readonly ['id'];
+                  };
+                  readonly name: 'project_versions_projects_users_fk';
+                },
+              ];
+            };
             readonly projects: {
               columns: {
+                readonly crdt_state: {
+                  readonly dataType: 'pg/bytea';
+                  readonly codecId: 'pg/bytea@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
                 readonly created_at: {
                   readonly dataType: 'pg/timestamp';
                   readonly codecId: 'pg/timestamp-string@1';
@@ -458,6 +600,12 @@ type ContractBase = Omit<
                 readonly created_by: {
                   readonly dataType: 'pg/uuid';
                   readonly codecId: 'pg/uuid@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly current_dbml: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
                   readonly nullable: false;
                   readonly many: false;
                 };
@@ -482,6 +630,12 @@ type ContractBase = Omit<
                     readonly kind: 'literal';
                     readonly value: DefaultLiteralValue<'pg/bool@1', true>;
                   };
+                  readonly many: false;
+                };
+                readonly layout_metadata: {
+                  readonly dataType: 'pg/jsonb';
+                  readonly codecId: 'pg/jsonb@1';
+                  readonly nullable: true;
                   readonly many: false;
                 };
                 readonly owner_user_id: {
@@ -744,6 +898,10 @@ type ContractBase = Omit<
   readonly target: 'postgres';
   readonly targetFamily: 'sql';
   readonly roots: {
+    readonly project_versions: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'ProjectVersions';
+    };
     readonly projects: { readonly namespace: 'public' & NamespaceId; readonly model: 'Projects' };
     readonly projects_users: {
       readonly namespace: 'public' & NamespaceId;
@@ -757,6 +915,10 @@ type ContractBase = Omit<
         readonly models: {
           readonly Projects: {
             readonly fields: {
+              readonly crdtState: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bytea@1' };
+              };
               readonly createdAt: {
                 readonly nullable: false;
                 readonly type: {
@@ -767,6 +929,10 @@ type ContractBase = Omit<
               readonly createdBy: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/uuid@1' };
+              };
+              readonly currentDbml: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
               readonly description: {
                 readonly nullable: true;
@@ -783,6 +949,10 @@ type ContractBase = Omit<
               readonly isActive: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
+              };
+              readonly layoutMetadata: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/jsonb@1' };
               };
               readonly ownerUserId: {
                 readonly nullable: false;
@@ -817,6 +987,17 @@ type ContractBase = Omit<
                   readonly targetFields: readonly ['id'];
                 };
               };
+              readonly projectVersions: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'ProjectVersions';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['projectId'];
+                };
+              };
               readonly projectsUsers: {
                 readonly to: {
                   readonly namespace: 'public' & NamespaceId;
@@ -845,11 +1026,14 @@ type ContractBase = Omit<
               readonly table: 'projects';
               readonly namespaceId: 'public';
               readonly fields: {
+                readonly crdtState: { readonly column: 'crdt_state' };
                 readonly createdAt: { readonly column: 'created_at' };
                 readonly createdBy: { readonly column: 'created_by' };
+                readonly currentDbml: { readonly column: 'current_dbml' };
                 readonly description: { readonly column: 'description' };
                 readonly id: { readonly column: 'id' };
                 readonly isActive: { readonly column: 'is_active' };
+                readonly layoutMetadata: { readonly column: 'layout_metadata' };
                 readonly ownerUserId: { readonly column: 'owner_user_id' };
                 readonly title: { readonly column: 'title' };
                 readonly updatedAt: { readonly column: 'updated_at' };
@@ -914,6 +1098,17 @@ type ContractBase = Omit<
                   readonly targetFields: readonly ['id'];
                 };
               };
+              readonly projectVersions: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'ProjectVersions';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['createdBy'];
+                };
+              };
               readonly user: {
                 readonly to: {
                   readonly namespace: 'public' & NamespaceId;
@@ -951,6 +1146,79 @@ type ContractBase = Omit<
                 readonly role: { readonly column: 'role' };
                 readonly updatedAt: { readonly column: 'updated_at' };
                 readonly userId: { readonly column: 'user_id' };
+              };
+            };
+          };
+          readonly ProjectVersions: {
+            readonly fields: {
+              readonly commitMessage: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'sql/varchar@1';
+                  readonly typeParams: { readonly length: 300 };
+                };
+              };
+              readonly createdAt: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-string@1';
+                };
+              };
+              readonly createdBy: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/uuid@1' };
+              };
+              readonly dbmlSnapshot: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/uuid@1' };
+              };
+              readonly projectId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/uuid@1' };
+              };
+            };
+            readonly relations: {
+              readonly project: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Projects';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['projectId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+              readonly projectsUsers: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'ProjectsUsers';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['createdBy'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'project_versions';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly commitMessage: { readonly column: 'commit_message' };
+                readonly createdAt: { readonly column: 'created_at' };
+                readonly createdBy: { readonly column: 'created_by' };
+                readonly dbmlSnapshot: { readonly column: 'dbml_snapshot' };
+                readonly id: { readonly column: 'id' };
+                readonly projectId: { readonly column: 'project_id' };
               };
             };
           };

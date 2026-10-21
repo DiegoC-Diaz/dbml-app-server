@@ -4,6 +4,10 @@
   "target": "postgres",
   "profileHash": "3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2",
   "roots": {
+    "project_versions": {
+      "model": "ProjectVersions",
+      "namespace": "public"
+    },
     "projects": {
       "model": "Projects",
       "namespace": "public"
@@ -21,8 +25,122 @@
     "namespaces": {
       "public": {
         "models": {
+          "ProjectVersions": {
+            "fields": {
+              "commitMessage": {
+                "nullable": true,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 300
+                  }
+                }
+              },
+              "createdAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamp-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdBy": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/uuid@1",
+                  "kind": "scalar"
+                }
+              },
+              "dbmlSnapshot": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/uuid@1",
+                  "kind": "scalar"
+                }
+              },
+              "projectId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/uuid@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "project": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "projectId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Projects",
+                  "namespace": "public"
+                }
+              },
+              "projectsUsers": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "createdBy"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "ProjectsUsers",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "commitMessage": {
+                  "column": "commit_message"
+                },
+                "createdAt": {
+                  "column": "created_at"
+                },
+                "createdBy": {
+                  "column": "created_by"
+                },
+                "dbmlSnapshot": {
+                  "column": "dbml_snapshot"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "projectId": {
+                  "column": "project_id"
+                }
+              },
+              "namespaceId": "public",
+              "table": "project_versions"
+            }
+          },
           "Projects": {
             "fields": {
+              "crdtState": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/bytea@1",
+                  "kind": "scalar"
+                }
+              },
               "createdAt": {
                 "nullable": false,
                 "type": {
@@ -34,6 +152,13 @@
                 "nullable": false,
                 "type": {
                   "codecId": "pg/uuid@1",
+                  "kind": "scalar"
+                }
+              },
+              "currentDbml": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
               },
@@ -58,6 +183,13 @@
                 "nullable": false,
                 "type": {
                   "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
+              "layoutMetadata": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/jsonb@1",
                   "kind": "scalar"
                 }
               },
@@ -103,6 +235,21 @@
                   "namespace": "public"
                 }
               },
+              "projectVersions": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "projectId"
+                  ]
+                },
+                "to": {
+                  "model": "ProjectVersions",
+                  "namespace": "public"
+                }
+              },
               "projectsUsers": {
                 "cardinality": "1:N",
                 "on": {
@@ -137,11 +284,17 @@
             },
             "storage": {
               "fields": {
+                "crdtState": {
+                  "column": "crdt_state"
+                },
                 "createdAt": {
                   "column": "created_at"
                 },
                 "createdBy": {
                   "column": "created_by"
+                },
+                "currentDbml": {
+                  "column": "current_dbml"
                 },
                 "description": {
                   "column": "description"
@@ -151,6 +304,9 @@
                 },
                 "isActive": {
                   "column": "is_active"
+                },
+                "layoutMetadata": {
+                  "column": "layout_metadata"
                 },
                 "ownerUserId": {
                   "column": "owner_user_id"
@@ -242,6 +398,21 @@
                 },
                 "to": {
                   "model": "Projects",
+                  "namespace": "public"
+                }
+              },
+              "projectVersions": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "createdBy"
+                  ]
+                },
+                "to": {
+                  "model": "ProjectVersions",
                   "namespace": "public"
                 }
               },
@@ -503,8 +674,94 @@
             }
           },
           "table": {
+            "project_versions": {
+              "columns": {
+                "commit_message": {
+                  "codecId": "sql/varchar@1",
+                  "dataType": "pg/varchar",
+                  "nullable": true,
+                  "typeParams": {
+                    "length": 300
+                  }
+                },
+                "created_at": {
+                  "codecId": "pg/timestamp-string@1",
+                  "dataType": "pg/timestamp",
+                  "nullable": true
+                },
+                "created_by": {
+                  "codecId": "pg/uuid@1",
+                  "dataType": "pg/uuid",
+                  "nullable": false
+                },
+                "dbml_snapshot": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/uuid@1",
+                  "dataType": "pg/uuid",
+                  "nullable": false
+                },
+                "project_id": {
+                  "codecId": "pg/uuid@1",
+                  "dataType": "pg/uuid",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "name": "project_versions_projects_fk",
+                  "source": {
+                    "columns": [
+                      "project_id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "project_versions"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "projects"
+                  }
+                },
+                {
+                  "name": "project_versions_projects_users_fk",
+                  "source": {
+                    "columns": [
+                      "created_by"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "project_versions"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "projects_users"
+                  }
+                }
+              ],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ],
+                "name": "project_versions_pk"
+              },
+              "uniques": []
+            },
             "projects": {
               "columns": {
+                "crdt_state": {
+                  "codecId": "pg/bytea@1",
+                  "dataType": "pg/bytea",
+                  "nullable": true
+                },
                 "created_at": {
                   "codecId": "pg/timestamp-string@1",
                   "dataType": "pg/timestamp",
@@ -517,6 +774,11 @@
                 "created_by": {
                   "codecId": "pg/uuid@1",
                   "dataType": "pg/uuid",
+                  "nullable": false
+                },
+                "current_dbml": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
                   "nullable": false
                 },
                 "description": {
@@ -540,6 +802,11 @@
                     "value": true
                   },
                   "nullable": false
+                },
+                "layout_metadata": {
+                  "codecId": "pg/jsonb@1",
+                  "dataType": "pg/jsonb",
+                  "nullable": true
                 },
                 "owner_user_id": {
                   "codecId": "pg/uuid@1",
@@ -860,7 +1127,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "48d97702cdfd5f8d33e6e1a9222e0d0f44f4d714c8dc1aeab16c3c2700c4013b"
+    "storageHash": "f68f93e35870291e96a33666759799cad581899e606fa59f3cff62e9f8319b49"
   },
   "capabilities": {
     "postgres": {
