@@ -18,6 +18,7 @@ async function bootstrap() {
     .setDescription("restfull api for development")
     .setVersion("1.0")
     .addTag("dbml")
+    .addBearerAuth()
     .build();
 
   const documentFactory=()=>SwaggerModule.createDocument(app,config);
