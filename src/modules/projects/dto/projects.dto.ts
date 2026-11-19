@@ -1,9 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import type { JsonValue } from '@prisma/orm-postgres/target/codec-types';
 import { z } from 'zod';
+import { appConfig } from '../../../common/app-config.js';
 import type { Project, ProjectDetails } from './projects.js';
-
-export const DEFAULT_PROJECT_TITLE = 'Proyecto sin título';
 
 export const createProjectSchema = z.object({
   title: z.string().trim().max(150).optional(),
@@ -55,7 +54,7 @@ export class CreateProjectSwaggerDTO {
   @ApiPropertyOptional({
     description: 'Título del proyecto (máximo 150 caracteres)',
     example: 'E-Commerce Database Schema',
-    default: DEFAULT_PROJECT_TITLE,
+    default: appConfig.projects.defaultTitle,
     maxLength: 150,
   })
   title?: string;
