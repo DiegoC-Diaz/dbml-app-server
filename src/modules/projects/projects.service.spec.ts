@@ -1,8 +1,8 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { appConfig } from '../../common/app-config.js';
 import { toVarchar } from '../../common/castings.js';
-import { DEFAULT_PROJECT_TITLE } from './dto/projects.dto.js';
 import {
   ProjectsRepository,
   type ProjectDetailsRecord,
@@ -110,9 +110,9 @@ describe('ProjectsService', () => {
       expect(result.currentDbml).toBe(DEFAULT_DBML_TEMPLATE);
     });
 
-    it('uses DEFAULT_PROJECT_TITLE and DEFAULT_DBML_TEMPLATE when title is omitted or blank', async () => {
+    it('uses appConfig.projects.defaultTitle and DEFAULT_DBML_TEMPLATE when title is omitted or blank', async () => {
       const created = makeProjectRecord({
-        title: toVarchar(DEFAULT_PROJECT_TITLE, 150),
+        title: toVarchar(appConfig.projects.defaultTitle, 150),
       });
       repository.create.mockResolvedValue(created);
 
@@ -120,18 +120,18 @@ describe('ProjectsService', () => {
       expect(repository.create).toHaveBeenLastCalledWith({
         ownerUserId: 'user-1',
         createdBy: 'user-1',
-        title: DEFAULT_PROJECT_TITLE,
+        title: appConfig.projects.defaultTitle,
         description: null,
         currentDbml: DEFAULT_DBML_TEMPLATE,
         layoutMetadata: null,
       });
-      expect(resultOmitted.title).toBe(DEFAULT_PROJECT_TITLE);
+      expect(resultOmitted.title).toBe(appConfig.projects.defaultTitle);
 
       await service.create('user-1', { title: '   ', description: '   ' });
       expect(repository.create).toHaveBeenLastCalledWith({
         ownerUserId: 'user-1',
         createdBy: 'user-1',
-        title: DEFAULT_PROJECT_TITLE,
+        title: appConfig.projects.defaultTitle,
         description: null,
         currentDbml: DEFAULT_DBML_TEMPLATE,
         layoutMetadata: null,

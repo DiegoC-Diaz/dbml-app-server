@@ -1,5 +1,6 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import type { JsonValue } from '@prisma/orm-postgres/target/codec-types';
+import { appConfig } from '../../common/app-config.js';
 import { toVarchar } from '../../common/castings.js';
 import {
   ProjectsRepository,
@@ -7,7 +8,6 @@ import {
   type ProjectDetailsRecord,
   type UpdateProjectRecord,
 } from './projects.repository.js';
-import { DEFAULT_PROJECT_TITLE } from './dto/projects.dto.js';
 import type {
   Project,
   ProjectDetails,
@@ -33,7 +33,8 @@ export class ProjectsService {
   ) {}
 
   async create(userId: string, data: CreateProjectInput): Promise<Project> {
-    const resolvedTitle = data.title?.trim() || DEFAULT_PROJECT_TITLE;
+    const resolvedTitle =
+      data.title?.trim() || appConfig.projects.defaultTitle;
     const trimmedDescription = data.description?.trim();
 
     const record = await this.projectsRepository.create({

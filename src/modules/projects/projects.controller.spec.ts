@@ -1,8 +1,8 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { appConfig } from '../../common/app-config.js';
 import type { Project, ProjectDetails } from './dto/projects.js';
-import { DEFAULT_PROJECT_TITLE } from './dto/projects.dto.js';
 import { ProjectsController } from './projects.controller.js';
 import { DEFAULT_DBML_TEMPLATE, ProjectsService } from './projects.service.js';
 
@@ -23,7 +23,7 @@ function makeProjectDetails(
   return {
     id: '550e8400-e29b-41d4-a716-446655440000',
     ownerUserId: 'user-1',
-    title: DEFAULT_PROJECT_TITLE,
+    title: appConfig.projects.defaultTitle,
     description: null,
     createdBy: 'user-1',
     createdAt: '2026-11-19T10:00:00.000Z',
@@ -102,7 +102,7 @@ describe('ProjectsController', () => {
         currentDbml: undefined,
         layoutMetadata: null,
       });
-      expect(response.title).toBe(DEFAULT_PROJECT_TITLE);
+      expect(response.title).toBe(appConfig.projects.defaultTitle);
       expect(response.currentDbml).toBe(DEFAULT_DBML_TEMPLATE);
     });
 
