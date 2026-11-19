@@ -5,6 +5,18 @@ import { PrismaService } from '../../prisma/index.js';
 import type { Contract, FieldOutputTypes } from '../../prisma/contract.js';
 
 export type ProjectRecord = FieldOutputTypes['public']['Projects'];
+export type ProjectDetailsRecord = Pick<
+  ProjectRecord,
+  | 'id'
+  | 'ownerUserId'
+  | 'title'
+  | 'description'
+  | 'createdBy'
+  | 'createdAt'
+  | 'updatedAt'
+  | 'isActive'
+  | 'layoutMetadata'
+>;
 export type CreateProjectRecord = Omit<
   CreateInput<Contract, 'Projects', 'public'>,
   'id'
@@ -30,6 +42,22 @@ export class ProjectsRepository {
 
   async findById(id: string): Promise<ProjectRecord | null> {
     return await this.prisma.db.orm.public.Projects.where({ id }).first();
+  }
+
+  async findDetailsById(id: string): Promise<ProjectDetailsRecord | null> {
+    return await this.prisma.db.orm.public.Projects.select(
+      'id',
+      'ownerUserId',
+      'title',
+      'description',
+      'createdBy',
+      'createdAt',
+      'updatedAt',
+      'isActive',
+      'layoutMetadata',
+    )
+      .where({ id })
+      .first();
   }
 
   async findByOwnerId(

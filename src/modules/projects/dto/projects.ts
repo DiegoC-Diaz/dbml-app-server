@@ -14,8 +14,10 @@ export interface Project {
   layoutMetadata: JsonValue | null;
 }
 
+export type ProjectDetails = Omit<Project, 'currentDbml' | 'crdtState'>;
+
 export interface CreateProjectInput {
-  title: string;
+  title?: string;
   description?: string | null;
   currentDbml?: string;
   layoutMetadata?: JsonValue | null;

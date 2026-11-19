@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   ParseUUIDPipe,
   UseGuards,
   Inject,
@@ -18,6 +19,7 @@ import {
   ApiBearerAuth,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiBody,
   ApiCreatedResponse,
   ApiOkResponse,
@@ -35,6 +37,7 @@ import {
   createProjectSchema,
   cloneProjectSchema,
   updateProjectDetailsSchema,
+  findProjectByIdQuerySchema,
   updateProjectDbmlSchema,
   updateProjectLayoutSchema,
   type CreateProjectDTO,
@@ -47,7 +50,9 @@ import {
   UpdateProjectDetailsSwaggerDTO,
   UpdateProjectDbmlSwaggerDTO,
   UpdateProjectLayoutSwaggerDTO,
+  ProjectDetailsResponseDTO,
   ProjectResponseDTO,
+  toProjectDetailsResponseDTO,
   toProjectResponseDTO,
 } from './dto/projects.dto.js';
 
@@ -69,7 +74,7 @@ export class ProjectsController {
     description:
       'Inicializa un nuevo proyecto asignando al usuario autenticado como propietario (Owner).',
   })
-  @ApiBody({ type: CreateProjectSwaggerDTO })
+  @ApiBody({ type: CreateProjectSwaggerDTO, required: false })
   @ApiCreatedResponse({
     description: 'Proyecto creado exitosamente.',
     type: ProjectResponseDTO,
@@ -78,9 +83,9 @@ export class ProjectsController {
   @ApiUnauthorizedResponse({ description: 'No autenticado.' })
   async create(
     @CurrentUser() user: AuthenticatedUser,
-    @Body({ schema: createProjectSchema }) dto: CreateProjectDTO,
+    @Body({ schema: createProjectSchema }) dto?: CreateProjectDTO,
   ): Promise<ProjectResponseDTO> {
-    const parsed = createProjectSchema.safeParse(dto);
+    const parsed = createProjectSchema.safeParse(dto ?? {});
     if (!parsed.success) {
       throw new HttpException(parsed.error.flatten(), HttpStatus.BAD_REQUEST);
     }
@@ -149,22 +154,44 @@ export class ProjectsController {
   @ApiOperation({
     summary: 'Obtener un proyecto por ID',
     description:
-      'Retorna los detalles, código DBML actual y layout de un proyecto activo.',
+      'Retorna los detalles, código DBML actual y layout de un proyecto activo. Usa includeDbml=false para omitir currentDbml cuando la edición DBML ocurre por WebSocket.',
   })
   @ApiParam({
     name: 'id',
     description: 'UUID del proyecto',
     format: 'uuid',
   })
+  @ApiQuery({
+    name: 'includeDbml',
+    required: false,
+    type: Boolean,
+    description:
+      'Si es false, omite currentDbml de la consulta y respuesta (útil cuando el DBML se edita vía WebSocket). Por defecto true.',
+  })
   @ApiOkResponse({
     description: 'Proyecto encontrado.',
     type: ProjectResponseDTO,
   })
+  @ApiBadRequestResponse({ description: 'Parámetros de consulta inválidos.' })
   @ApiNotFoundResponse({ description: 'Proyecto no encontrado o inactivo.' })
   @ApiUnauthorizedResponse({ description: 'No autenticado.' })
   async findById(
     @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<ProjectResponseDTO> {
+    @Query('includeDbml') includeDbml?: string,
+  ): Promise<ProjectResponseDTO | ProjectDetailsResponseDTO> {
+    const parsedQuery = findProjectByIdQuerySchema.safeParse({ includeDbml });
+    if (!parsedQuery.success) {
+      throw new HttpException(
+        parsedQuery.error.flatten(),
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    if (parsedQuery.data.includeDbml === 'false') {
+      const details = await this.projectsService.findDetailsById(id);
+      return toProjectDetailsResponseDTO(details);
+    }
+
     const project = await this.projectsService.findById(id);
     return toProjectResponseDTO(project);
   }

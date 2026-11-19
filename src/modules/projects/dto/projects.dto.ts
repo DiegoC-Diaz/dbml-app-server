@@ -1,11 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import type { JsonValue } from '@prisma/orm-postgres/target/codec-types';
 import { z } from 'zod';
-import type { Project } from './projects.js';
+import type { Project, ProjectDetails } from './projects.js';
+
+export const DEFAULT_PROJECT_TITLE = 'Proyecto sin título';
 
 export const createProjectSchema = z.object({
-  title: z.string().min(1).max(150),
-  description: z.string().max(500).nullable().optional(),
+  title: z.string().trim().max(150).optional(),
+  description: z.string().trim().max(500).nullable().optional(),
   currentDbml: z.string().optional(),
   layoutMetadata: z.record(z.string(), z.unknown()).nullable().optional(),
 });
@@ -15,9 +17,18 @@ export const cloneProjectSchema = z.object({
   description: z.string().max(500).nullable().optional(),
 });
 
-export const updateProjectDetailsSchema = z.object({
-  title: z.string().min(1).max(150).optional(),
-  description: z.string().max(500).nullable().optional(),
+export const updateProjectDetailsSchema = z
+  .object({
+    title: z.string().trim().min(1).max(150).optional(),
+    description: z.string().trim().max(500).nullable().optional(),
+  })
+  .refine(
+    (data) => data.title !== undefined || data.description !== undefined,
+    { message: 'At least one of title or description must be provided' },
+  );
+
+export const findProjectByIdQuerySchema = z.object({
+  includeDbml: z.enum(['true', 'false']).optional(),
 });
 
 export const updateProjectDbmlSchema = z.object({
@@ -34,16 +45,20 @@ export type CloneProjectDTO = z.infer<typeof cloneProjectSchema>;
 export type UpdateProjectDetailsDTO = z.infer<
   typeof updateProjectDetailsSchema
 >;
+export type FindProjectByIdQueryDTO = z.infer<
+  typeof findProjectByIdQuerySchema
+>;
 export type UpdateProjectDbmlDTO = z.infer<typeof updateProjectDbmlSchema>;
 export type UpdateProjectLayoutDTO = z.infer<typeof updateProjectLayoutSchema>;
 
 export class CreateProjectSwaggerDTO {
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Título del proyecto (máximo 150 caracteres)',
     example: 'E-Commerce Database Schema',
+    default: DEFAULT_PROJECT_TITLE,
     maxLength: 150,
   })
-  title!: string;
+  title?: string;
 
   @ApiPropertyOptional({
     description: 'Descripción opcional del proyecto (máximo 500 caracteres)',
@@ -126,7 +141,7 @@ export class UpdateProjectLayoutSwaggerDTO {
   layoutMetadata!: Record<string, unknown> | null;
 }
 
-export class ProjectResponseDTO {
+export class ProjectDetailsResponseDTO {
   @ApiProperty({
     description: 'ID único del proyecto (UUID)',
     example: '550e8400-e29b-41d4-a716-446655440000',
@@ -177,12 +192,6 @@ export class ProjectResponseDTO {
   })
   isActive!: boolean;
 
-  @ApiProperty({
-    description: 'Contenido actual en sintaxis DBML',
-    example: 'Table users {\n  id uuid [pk]\n}',
-  })
-  currentDbml!: string;
-
   @ApiPropertyOptional({
     description: 'Metadatos de layout del canvas en formato JSON',
     example: { nodes: { users: { x: 100, y: 120 } }, zoom: 1 },
@@ -191,7 +200,15 @@ export class ProjectResponseDTO {
   layoutMetadata!: JsonValue | null;
 }
 
-export function toProjectResponseDTO(project: Project): ProjectResponseDTO {
+export class ProjectResponseDTO extends ProjectDetailsResponseDTO {
+  @ApiProperty({
+    description: 'Contenido actual en sintaxis DBML',
+    example: 'Table users {\n  id uuid [pk]\n}',
+  })
+  currentDbml!: string;
+}
+
+function mapProjectDetailsFields(project: ProjectDetails): ProjectDetails {
   return {
     id: project.id,
     ownerUserId: project.ownerUserId,
@@ -201,7 +218,19 @@ export function toProjectResponseDTO(project: Project): ProjectResponseDTO {
     createdAt: project.createdAt,
     updatedAt: project.updatedAt,
     isActive: project.isActive,
-    currentDbml: project.currentDbml,
     layoutMetadata: project.layoutMetadata,
+  };
+}
+
+export function toProjectDetailsResponseDTO(
+  project: ProjectDetails,
+): ProjectDetailsResponseDTO {
+  return mapProjectDetailsFields(project);
+}
+
+export function toProjectResponseDTO(project: Project): ProjectResponseDTO {
+  return {
+    ...mapProjectDetailsFields(project),
+    currentDbml: project.currentDbml,
   };
 }

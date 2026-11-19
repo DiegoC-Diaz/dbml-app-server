@@ -4,17 +4,20 @@ import { toVarchar } from '../../common/castings.js';
 import {
   ProjectsRepository,
   type ProjectRecord,
+  type ProjectDetailsRecord,
   type UpdateProjectRecord,
 } from './projects.repository.js';
+import { DEFAULT_PROJECT_TITLE } from './dto/projects.dto.js';
 import type {
   Project,
+  ProjectDetails,
   CreateProjectInput,
   CloneProjectInput,
   UpdateProjectDetailsInput,
   UpdateProjectDbmlInput,
 } from './dto/projects.js';
 
-const DEFAULT_DBML_TEMPLATE = `// Escribe tu esquema DBML aquí
+export const DEFAULT_DBML_TEMPLATE = `// Escribe tu esquema DBML aquí
 Table users {
   id uuid [primary key]
   username varchar(50) [not null, unique]
@@ -30,12 +33,14 @@ export class ProjectsService {
   ) {}
 
   async create(userId: string, data: CreateProjectInput): Promise<Project> {
+    const resolvedTitle = data.title?.trim() || DEFAULT_PROJECT_TITLE;
+    const trimmedDescription = data.description?.trim();
+
     const record = await this.projectsRepository.create({
       ownerUserId: userId,
       createdBy: userId,
-      title: toVarchar(data.title, 150),
-      description:
-        data.description != null ? toVarchar(data.description, 500) : null,
+      title: toVarchar(resolvedTitle, 150),
+      description: trimmedDescription ? toVarchar(trimmedDescription, 500) : null,
       currentDbml: data.currentDbml ?? DEFAULT_DBML_TEMPLATE,
       layoutMetadata: data.layoutMetadata ?? null,
     });
@@ -76,6 +81,14 @@ export class ProjectsService {
     return this.toProject(record);
   }
 
+  async findDetailsById(projectId: string): Promise<ProjectDetails> {
+    const record = await this.projectsRepository.findDetailsById(projectId);
+    if (!record || !record.isActive) {
+      throw new NotFoundException(`Project with id ${projectId} not found`);
+    }
+    return this.toProjectDetails(record);
+  }
+
   async findAllByOwner(ownerUserId: string): Promise<Project[]> {
     const records = await this.projectsRepository.findByOwnerId(
       ownerUserId,
@@ -88,20 +101,22 @@ export class ProjectsService {
     projectId: string,
     data: UpdateProjectDetailsInput,
   ): Promise<Project> {
-    await this.findById(projectId);
+    await this.findDetailsById(projectId);
+
+    const normalizedDescription =
+      data.description === undefined
+        ? undefined
+        : data.description === null || data.description.trim().length === 0
+          ? null
+          : toVarchar(data.description.trim(), 500);
 
     const updatePayload: UpdateProjectRecord = {
       updatedAt: new Date().toISOString(),
       ...(data.title !== undefined
-        ? { title: toVarchar(data.title, 150) }
+        ? { title: toVarchar(data.title.trim(), 150) }
         : {}),
-      ...(data.description !== undefined
-        ? {
-            description:
-              data.description !== null
-                ? toVarchar(data.description, 500)
-                : null,
-          }
+      ...(normalizedDescription !== undefined
+        ? { description: normalizedDescription }
         : {}),
     };
 
@@ -180,7 +195,7 @@ export class ProjectsService {
     }
   }
 
-  private toProject(record: ProjectRecord): Project {
+  private toProjectDetails(record: ProjectDetailsRecord): ProjectDetails {
     return {
       id: record.id,
       ownerUserId: record.ownerUserId,
@@ -191,9 +206,15 @@ export class ProjectsService {
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,
       isActive: record.isActive,
+      layoutMetadata: record.layoutMetadata,
+    };
+  }
+
+  private toProject(record: ProjectRecord): Project {
+    return {
+      ...this.toProjectDetails(record),
       currentDbml: record.currentDbml,
       crdtState: record.crdtState,
-      layoutMetadata: record.layoutMetadata,
     };
   }
 }
