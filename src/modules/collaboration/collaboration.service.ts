@@ -9,11 +9,7 @@ import { Database } from '@hocuspocus/extension-database';
 import { Server } from '@hocuspocus/server';
 import type * as Y from 'yjs';
 import { ProjectsService } from '../projects/projects.service.js';
-
-const DBML_TEXT_KEY = 'dbml';
-const DEFAULT_HOCUSPOCUS_PORT = 3002;
-const STORE_DEBOUNCE_MS = 2000;
-const STORE_MAX_DEBOUNCE_MS = 10000;
+import collaborationConfig from './config.json' with { type: 'json' };
 
 @Injectable()
 export class CollaborationService implements OnModuleInit, OnModuleDestroy {
@@ -30,10 +26,10 @@ export class CollaborationService implements OnModuleInit, OnModuleDestroy {
 
     this.server = new Server({
       port,
-      stopOnSignals: false,
-      debounce: STORE_DEBOUNCE_MS,
-      maxDebounce: STORE_MAX_DEBOUNCE_MS,
-      quiet: true,
+      stopOnSignals: collaborationConfig.stopOnSignals,
+      debounce: collaborationConfig.debounceMs,
+      maxDebounce: collaborationConfig.maxDebounceMs,
+      quiet: collaborationConfig.quiet,
       // TODO(v2): Add onAuthenticate hook to validate JWT and project membership (projects_users).
       extensions: [
         new Database({
@@ -74,7 +70,7 @@ export class CollaborationService implements OnModuleInit, OnModuleDestroy {
       return project.crdtState;
     }
 
-    const yText = document.getText(DBML_TEXT_KEY);
+    const yText = document.getText(collaborationConfig.dbmlTextKey);
     if (yText.length === 0 && project.currentDbml) {
       document.transact(() => {
         yText.insert(0, project.currentDbml);
@@ -92,7 +88,9 @@ export class CollaborationService implements OnModuleInit, OnModuleDestroy {
     document: Y.Doc,
     state: Buffer,
   ): Promise<void> {
-    const currentDbml = document.getText(DBML_TEXT_KEY).toJSON();
+    const currentDbml = document
+      .getText(collaborationConfig.dbmlTextKey)
+      .toJSON();
 
     await this.projectsService.updateDbml(documentName, {
       currentDbml,
@@ -103,12 +101,12 @@ export class CollaborationService implements OnModuleInit, OnModuleDestroy {
   private resolvePort(): number {
     const rawPort = process.env.HOCUSPOCUS_PORT;
     if (!rawPort) {
-      return DEFAULT_HOCUSPOCUS_PORT;
+      return collaborationConfig.defaultPort;
     }
 
     const parsed = Number(rawPort);
     return Number.isInteger(parsed) && parsed > 0
       ? parsed
-      : DEFAULT_HOCUSPOCUS_PORT;
+      : collaborationConfig.defaultPort;
   }
 }

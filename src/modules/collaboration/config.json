@@ -1,0 +1,8 @@
+{
+  "dbmlTextKey": "dbml",
+  "defaultPort": 3002,
+  "debounceMs": 2000,
+  "maxDebounceMs": 10000,
+  "stopOnSignals": false,
+  "quiet": true
+}
