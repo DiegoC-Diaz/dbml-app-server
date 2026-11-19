@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { createObserveModule } from '@nestjs/observe';
 import { AppController } from './app.controller.js';
-import { AppService } from './app.service.js';
 import { UsersModule } from './modules/users/users.module.js';
 import { PrismaModule } from './prisma/index.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { ProjectsModule } from './modules/projects/projects.module.js';
-
+import { CollaborationModule } from './modules/collaboration/collaboration.module.js';
+import { ProjectGateWay } from './modules/projects/projects.gateway.js';
+import { AppService } from './app.service.js';
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
 @Module({
@@ -18,8 +19,9 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     UsersModule,
     AuthModule,
     ProjectsModule,
+    CollaborationModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,ProjectGateWay],
 })
 export class AppModule {}

@@ -23,6 +23,8 @@
     "contract:emit": "prisma contract emit"
   },
   "dependencies": {
+    "@hocuspocus/extension-database": "^4.8.0",
+    "@hocuspocus/server": "^4.8.0",
     "@nestjs/common": "^12.0.1",
     "@nestjs/config": "^12.0.1",
     "@nestjs/core": "^12.0.1",
@@ -30,7 +32,9 @@
     "@nestjs/observe": "^0.3.0",
     "@nestjs/passport": "^12.0.0",
     "@nestjs/platform-express": "^12.0.1",
+    "@nestjs/platform-socket.io": "^12.5.0",
     "@nestjs/swagger": "^12.0.2",
+    "@nestjs/websockets": "^12.5.0",
     "@prisma/orm-postgres": "^8.0.0-rc.17",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
@@ -40,6 +44,9 @@
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "temporal-polyfill": "^1.0.5",
+    "valibot": "^1.5.0",
+    "y-websocket": "^3.1.0",
+    "yjs": "^13.6.33",
     "zod": "^4.6.7"
   },
   "devDependencies": {
@@ -65,5 +72,12 @@
     "typescript": "^6.0.3",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^4.1.2"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "@scarf/scarf": false,
+    "fsevents@2.3.3": true,
+    "workerd@1.20260704.1": true,
+    "msgpackr-extract@3.0.7": true
   }
 }
